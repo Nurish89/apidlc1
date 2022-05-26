@@ -1,0 +1,182 @@
+
+============================================================
+2022-05-11 09:54:23
+============================================================
+Array
+(
+    [location] => Login/login
+    [apiName] => Login
+    [input] => Array
+        (
+            [loginUserName] => nurish@test.com.my
+            [password] => 1234
+            [apiKey] => ddf6842084aae5011d0d927ee707bf2d
+            [userName] => fptTest
+        )
+
+    [output] => Array
+        (
+            [status] => Error
+            [msg] => Invalid login User Name or Password
+            [timeStamp] => 2022-05-11 09:54:23
+        )
+
+)
+
+
+============================================================
+2022-05-11 09:56:56
+============================================================
+Array
+(
+    [location] => Login/login
+    [apiName] => Login
+    [input] => Array
+        (
+            [loginUserName] => nurish@test.com.my
+            [password] => 1234
+            [apiKey] => ddf6842084aae5011d0d927ee707bf2d
+            [userName] => fptTest
+        )
+
+    [output] => Array
+        (
+            [status] => Error
+            [msg] => Invalid login User Name or Password
+            [timeStamp] => 2022-05-11 09:56:56
+        )
+
+)
+
+
+============================================================
+2022-05-11 10:14:37
+============================================================
+Array
+(
+    [location] => Login/login
+    [apiName] => Login
+    [input] => Array
+        (
+            [loginUserName] => nurish@test.com.my
+            [password] => 88888
+            [apiKey] => ddf6842084aae5011d0d927ee707bf2d
+            [userName] => fptTest
+        )
+
+    [output] => Array
+        (
+            [status] => Error
+            [msg] => Invalid login User Name or Password
+            [timeStamp] => 2022-05-11 10:14:37
+        )
+
+)
+
+
+============================================================
+2022-05-11 15:18:13
+============================================================
+Array
+(
+    [location] => Login/login
+    [apiName] => Login
+    [input] => Array
+        (
+            [loginUserName] => nurish@test.com.my
+            [password] => 333333
+            [apiKey] => ddf6842084aae5011d0d927ee707bf2d
+            [userName] => fptTest
+        )
+
+    [output] => Array
+        (
+            [status] => Error
+            [msg] => Invalid login User Name or Password
+            [timeStamp] => 2022-05-11 15:18:13
+        )
+
+)
+
+
+============================================================
+2022-05-11 16:01:51
+============================================================
+Array
+(
+    [location] => Login/login
+    [apiName] => Login
+    [input] => Array
+        (
+            [loginUserName] => nurish@test.com.my
+            [password] => admin123
+            [apiKey] => ddf6842084aae5011d0d927ee707bf2d
+            [userName] => fptTest
+        )
+
+    [output] => Array
+        (
+            [status] => Success
+            [msg] => Array
+                (
+                    [userId] => 41
+                    [role] => admin
+                )
+
+            [timeStamp] => 2022-05-11 16:01:51
+            [page] => dashboard
+        )
+
+)
+
+
+============================================================
+2022-05-11 16:02:50
+============================================================
+Array
+(
+    [location] => Brand/getBrands
+    [apiName] => getBrands
+    [input] => Array
+        (
+            [userName] => fptTest
+            [apiKey] => ddf6842084aae5011d0d927ee707bf2d
+            [categoryId] => 1
+        )
+
+    [output] => Array
+        (
+            [status] => Success
+            [msg] => Array
+                (
+                    [count] => 2
+                    [data] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [id] => 1
+                                    [name] => Apple
+                                    [categoryId] => 1
+                                )
+
+                            [1] => Array
+                                (
+                                    [id] => 2
+                                    [name] => Samsung
+                                    [categoryId] => 1
+                                )
+
+                        )
+
+                )
+
+            [timeStamp] => 2022-05-11 16:02:50
+        )
+
+)
+
+
+2022-05-11 16:17:45 : Login|Array|Array
+
+2022-05-11 16:20:11 : Login|{"loginUserName":"nurish@test.com.my","password":"admin123","apiKey":"ddf6842084aae5011d0d927ee707bf2d","userName":"fptTest"}|{"status":"Success","msg":{"userId":"41","role":"admin"},"timeStamp":"2022-05-11 16:20:11","page":"dashboard"}
+
