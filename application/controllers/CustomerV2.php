@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
+date_default_timezone_set('Asia/Kuala_Lumpur');
 class CustomerV2 extends CI_Controller {
 
 	public function __construct()
@@ -112,7 +112,8 @@ class CustomerV2 extends CI_Controller {
 		$this->form_validation->set_rules("storeId", "Store Id", "required");
 		$this->form_validation->set_rules("customerInfoData", "Customer Info Data", "required");
 		$this->form_validation->set_rules("pdpa", "PDPA", "required");
-		if ($this->form_validation->run()){
+		if ($this->form_validation->run())
+		{
 			$userName = $this->input->post('userName');
 			$apiKey = $this->input->post('apiKey');
 			$storeId = $this->input->post('storeId');
@@ -129,45 +130,59 @@ class CustomerV2 extends CI_Controller {
 						$programId = $ud['programId'];	
 				}
 				//Check PDPA Value
-				if(strtolower($pdpa) == 'accepted'){
+				if(strtolower($pdpa) == 'accepted')
+				{
 					$appInfo = array();
 					if(isset($ud['sku']))
 						$appInfo['product'] = $ud['sku'];
 					//Check Store validity
 					$getStore = $this->ModelStore->getStore($storeId);
-					if($getStore){
+					if($getStore)
+					{
 						$basicFormData = array();
 						$check = array("isDeleted" => 0, "programId" => $programId, "phase" => "Initial Customer Verification");
 						$bfd = $this->ModelProgram->getFormData($check);
 						if($bfd)
 							$basicFormData = json_decode($bfd['data'][0]['data'],true);
 						$isValidFormData = $this ->validateFormData($userData, $basicFormData);
-						if($isValidFormData['status'] == 'Success'){
+						if($isValidFormData['status'] == 'Success')
+						{
 							$subscriptionId = 0;
 							$customerRowData = json_decode($userData, true);
 							//print_r($customerRowData);
-							if(isset($customerRowData['nationalId'])){
+							if(isset($customerRowData['nationalId']))
+							{
 								$nationalId = $customerRowData['nationalId'];
 								$isCustomerExist =$this -> ModelCustomerV2 -> getCustomerLike('cData', $nationalId);
-								if($isCustomerExist){
+								if($isCustomerExist)
+								{
+									$this->LogManager->logApi($apiName, 'isCustomerExist', '');
 									$customerId = $isCustomerExist['data']['0']['id'];
-									if($this->ModelCustomerV2->isCustomerBlock($customerId)){
+									if($this->ModelCustomerV2->isCustomerBlock($customerId))
+									{
 										$output = array("status" => "Success",  'timeStamp' => date('Y-m-d H:i:s'), "customerId" => $customerId, "validationStatus" => "failed", "newCustomer" => 0);
 										//$this -> ModelUtility -> saveLog($apiName, $input, $output);
 										$this->LogManager->logApi($apiName, $input, $output);
 										echo json_encode($output, JSON_UNESCAPED_UNICODE);
-									}else{	
+									}
+									else{	
 										$subscriptionId = 0;
 										$verificationCustomer = $this -> ModelCustomerV2 ->getCustomerVerificationStatus($customerId, $storeId, $programId);
-										if($verificationCustomer){
+										if($verificationCustomer)
+										{
+											$this->LogManager->logApi($apiName, 'verificationCustomer='.$verificationCustomer, '');
 											$verificationData = $verificationCustomer['data'][0];
 											$customerVerificationStatus = $verificationData['status'];
 											if(strtolower($customerVerificationStatus) != 'lead' and strtolower($customerVerificationStatus) != 'inactive' and strtolower($customerVerificationStatus) != 'failed')
 												$subscriptionId = 1;
 										}
 										$status = 'failed';	
-										if($subscriptionId == 0){
-											if($direct == 0){
+										if($subscriptionId == 0)
+										{
+											$this->LogManager->logApi($apiName, 'subscriptionId='.$subscriptionId, '');
+											$this->LogManager->logApi($apiName, 'direct='.$direct, '');
+											if($direct == 0)
+											{
 												$verificationStatus = $this -> getCustomerInfoMAFC($userData);
 												$status = 'failed';
 												if($verificationStatus['status'] == 'Success'){
@@ -193,15 +208,23 @@ class CustomerV2 extends CI_Controller {
 												$status = 'lead';
 												$this -> ModelCustomerV2 ->updateCustomerVerificationStatusByCustomerId($customerId, $status);
 											}
-										}else{
+										}
+										else{
 											$status = 'lead';
+											$cData = json_decode($userData,true);
+											$customerName = $cData['fName'].' '.$cData['mName'].' '.$cData['lName'];
+											echo $customerName; exit();
+											$customerData =  array("storeId" => $storeId, "programId" => $programId, "customerName" => $customerName, "nationalid" => $cData['nationalId'], "cData" => $userData, "modifiedDate" => date('Y-m-d h:i:s'));
+											$this -> ModelCustomerV2 ->updateCustomerInfo($customerData, $customerId);
 										}	
 										$output = array("status" => "Success",  'timeStamp' => date('Y-m-d H:i:s'),"subscriptionId"=>$subscriptionId, "customerId" => $customerId, "validationStatus" => $status, "subscriptionId"=> $subscriptionId, "newCustomer" => 0);
-										//$this -> ModelUtility -> saveLog($apiName, $input, $output);
+										$this -> ModelUtility -> saveapiLog($apiName, $input, $output, 'update', $customerId);
 										$this->LogManager->logApi($apiName, $input, $output);
 										echo json_encode($output, JSON_UNESCAPED_UNICODE);
 									}	
-								}else{
+								}
+								else{
+									$this->LogManager->logApi($apiName, 'isNotCustomerExist', '');
 									$customerData =  array("storeId" => $storeId, "programId" => $programId, "customerData" => $userData);
 									$customerId = $this -> ModelCustomerV2 -> addCustomer($customerData);
 									
@@ -238,6 +261,7 @@ class CustomerV2 extends CI_Controller {
 									if($customerVerificationId){
 										$output = array("status" => "Success",  'timeStamp' => date('Y-m-d H:i:s'), "customerId" => $customerId, "validationStatus" => $status, "subscriptionId" => $subscriptionId, "newCustomer" => 1);
 										//$this -> ModelUtility -> saveLog($apiName, $input, $output);
+										$this -> ModelUtility -> saveapiLog($apiName, $input, $output, 'insert', $customerId);
 										$this->LogManager->logApi($apiName, $input, $output);
 										echo json_encode($output, JSON_UNESCAPED_UNICODE);
 									}else{
@@ -286,11 +310,20 @@ class CustomerV2 extends CI_Controller {
 				echo json_encode($output, JSON_UNESCAPED_UNICODE);
 				//print_r($arr);
 			}
-		}	
+		}
+		$this->ModelUtility->saveapiLog($apiName, $input, $output);
+		
 	//echo true;
 	}
 
-	public function getCustomerICDocument(){
+	public function testMAFCAPI(){
+
+		$verificationStatus = $this->getCustomerInfoMAFC_Test();
+		print_r($verificationStatus); exit();
+	}
+
+	public function getCustomerICDocument()
+	{
 		$input = $this->input->post();
 		$apiName = 'getCustomerICDocument'; 
 		$this->form_validation->set_rules("userName", "User Name", "required");
@@ -354,7 +387,8 @@ class CustomerV2 extends CI_Controller {
 		}	
 	}
 
-	public function submitApplicationDoc(){
+	public function submitApplicationDoc()
+	{
 		$input = $this->input->post();
 		$apiName = 'submitApplicationDoc'; 
 		$this->form_validation->set_rules("userName", "User Name", "required");
@@ -367,10 +401,19 @@ class CustomerV2 extends CI_Controller {
 			$apiKey = $this->input->post('apiKey');
 			$customerId = $this->input->post('customerId');
 			$isAuthenticate = $this -> ModelUtility -> checkApiAuthentication($userName, $apiKey);	
-			if($isAuthenticate){
+			if($isAuthenticate)
+			{
 				$documentType = $this->input->post('documentType');
 				$documents = $this->input->post('documents');
 				$documents = json_decode($documents,true)[0];
+
+				if($this->ModelCustomerV2->getCustomerDocData($customerId)){
+					$function = 'update';
+				}
+				else{
+					$function = 'insert';
+				}
+
 				foreach($documents as $k => $v){
 					$imgPath = './img/customerDoc/';
 					
@@ -384,14 +427,16 @@ class CustomerV2 extends CI_Controller {
 					file_put_contents($imgPath.$fileName, $data);
 					$docData = array("customerId" => $customerId, "docType" => "file", "label" => $documentType, "docData" => BASE_URL."img/customerDoc/".$fileName);
 					$this -> ModelCustomerV2 -> addCustomerDocument($docData);
-				}	
+				}
 				
 				$output = array("status" => "Success",  'timeStamp' => date('Y-m-d H:i:s'));
-				//$this -> ModelUtility -> saveLog($apiName, $input, $output);
+				//$this -> ModelUtility -> saveLog($apiName, $input, $output);				
+				$this -> ModelUtility -> saveapiLog($apiName, $input, $output, $function, $customerId);	
 				$this->LogManager->logApi($apiName, $input, $output);
 				echo json_encode($output, JSON_UNESCAPED_UNICODE);
 				
-			}else{
+			}
+			else{
 				$output = array("status" => "Error", "msg" => "Invalid User Name or Api Key", 'timeStamp' => date('Y-m-d H:i:s'));
 				//$this -> ModelUtility -> saveLog($apiName, $input, $output);
 				$this->LogManager->logApi($apiName, $input, $output);
@@ -408,7 +453,8 @@ class CustomerV2 extends CI_Controller {
 		}	
 	}
 
-	public function submitCustomerApplication(){
+	public function submitCustomerApplication()
+	{
 		$input = $this->input->post();
 		$apiName = 'submitCustomerApplication'; 
 		$this->form_validation->set_rules("userName", "User Name", "required");
@@ -426,12 +472,14 @@ class CustomerV2 extends CI_Controller {
 					$programId = $isCustomerExist['data']['0']['programId'];
 					$storeId = $isCustomerExist['data']['0']['storeId'];
 					$customerApplicationData = $this->input->post('customerApplicationData');
+					$caData = json_decode($customerApplicationData, true);
+					$appId = $caData['appId'];
 					$subscriptionData = $this -> ModelSubscription -> getSubscriptionIDByCustomerId($customerId);
 					if($subscriptionData){
 						$subscriptionData = $subscriptionData[sizeof($subscriptionData)-1];
 						$res = $subscriptionData['id'];
 						$newRef = $subscriptionData['referenceNumber'];
-						$uData = array("programId" => $programId, "channelPartnerStoreId" => $storeId, "appInfo" => $customerApplicationData,"status" => "11");
+						$uData = array("programId" => $programId, "channelPartnerStoreId" => $storeId, "appInfo" => $customerApplicationData,"status" => "11", "appId" => $appId);
 						$whereData = array("id"=>$res);
 						$this->ModelSubscription->updateSubscription($uData, $whereData);
 						$output = array("status" => "Success", "applicationId" => $newRef, 'timeStamp' => date('Y-m-d H:i:s'));
@@ -487,7 +535,8 @@ class CustomerV2 extends CI_Controller {
 		}	
 	}	
 
-	public function setStatus(){
+	public function setStatus()
+	{
 		$input = $this->input->post();
 		$apiName = 'setStatus'; 
 		$this->form_validation->set_rules("userName", "User Name", "required");
@@ -503,7 +552,8 @@ class CustomerV2 extends CI_Controller {
 			$remark = $this->input->post('Remarks');
 			$isAuthenticate = $this -> ModelUtility -> checkApiAuthentication($userName, $apiKey);	
 			if($isAuthenticate){
-				$subscriptionData =$this ->$this->ModelSubscription->getSubscriptionByAppId($appId);
+				$subscriptionData = $this->ModelSubscription->getSubscriptionByAppId($appId);
+				//print_r($subscriptionData); exit();
 				if($subscriptionData){
 					$type = $this->input->post('type');
 					if($type == "AP" or $type == 'DB'){
@@ -536,7 +586,8 @@ class CustomerV2 extends CI_Controller {
 										$this -> ModelCustomerV2 -> blockCustomer($subscriptionData[0]['customerId'], 30);
 									if($remarkChar == '2')
 										$this -> ModelCustomerV2 -> updateCustomerVerificationStatusByCustomerId($subscriptionData[0]['customerId'], 'lead');
-								}else if($status == 'AH001'){
+								}
+								else if($status == 'AH001'){
 									$doc = explode(';', $remark);
 									$newRemark = '';
 									foreach($doc as $docu){
@@ -848,7 +899,8 @@ class CustomerV2 extends CI_Controller {
 	//echo true;
 	}
 
-	public function addApplication($programId, $storeId, $employeeId, $customerId, $appId, $appInfo){
+	public function addApplication($programId, $storeId, $employeeId, $customerId, $appId, $appInfo)
+	{
 		$newData = array("programId" => $programId, "channelPartnerStoreId" => $storeId, "createdStaff" => $employeeId, "customerId" => $customerId, "status" => "11", "appId" => $appId, "appInfo" => json_encode($appInfo, JSON_UNESCAPED_UNICODE));
 		if(isset($appInfo['product'])){
 			$newData['product'] = $appInfo['product']; 
@@ -1203,6 +1255,50 @@ class CustomerV2 extends CI_Controller {
 		}
 	}
 
+	public function getCustomerInfoMAFC_Test(){
+		$url = MAFCLINK;
+		//$data = json_decode($data,true);
+		$data['msgName'] = 'checkCustomer';
+		$data['partnerId'] = 'COMP';
+		$data['productType'] = 'CDLPIL';
+		$data['agentId'] = '123';
+		$data['agentContact'] = '000000000';
+		$data['shopId'] = '1245';
+		$data['fName'] = 'Aidzuddin';
+		$data['mName'] = '';
+		$data['lName'] = '';
+		$postData = $data;
+		$data = json_encode($data);
+	      // append the header putting the secret key and hash
+		$request_headers = array('Content-Type: application/json');
+		    $ch = curl_init();
+	        curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);	
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		$data = curl_exec($ch);
+		if (curl_errno($ch)){	        
+			return array("status" => "Error", "msg" => curl_error($ch));
+        }else{
+			$transaction = json_decode($data, TRUE);
+			//$this -> ModelUtility -> saveLog('checkCustomer', $postData, $transaction);
+			$this->LogManager->logApi('checkCustomer', $postData, $transaction);
+			if(isset($transaction['returnCode'])){
+				if($transaction['returnCode'] == 0)
+					return array("status" => "Success", "returnCode" => $transaction['returnCode'], "msg" => $transaction['applicationId']);
+				else if($transaction['returnCode'] == 600 or $transaction['returnCode'] == 500)	
+					return array("status" => "Success", "returnCode" => $transaction['returnCode'], "msg" => $transaction['applicationId']);
+				else
+					return array("status" => "Error", "msg" => $data);
+			}else{
+				return array("status" => "Error", "msg" => $data);
+			}
+		        curl_close($ch);
+		}
+	}
 
 	public function createApplicationOCB1($data){
 		$url = OCBLINK."api/CompAsia/CreateNewApp";
@@ -1263,6 +1359,43 @@ class CustomerV2 extends CI_Controller {
 			}
 		        curl_close($ch);
       		}
+	}
+
+	function testgenerateOCBToken()
+	{
+		$url = OCBLINK."token";
+	    // append the header putting the secret key and hash
+		$request_headers = array('Content-Type:application/x-www-form-urlencoded');
+		$data = "username=".OCBUSERNAME."&password=".OCBPASSWORD."&grant_type=password";
+	    $ch = curl_init();
+	    curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+	    $data = curl_exec($ch);
+	    if (curl_errno($ch))
+		{
+		print "Error: " . curl_error($ch);
+		}
+		else
+		{
+			// Show me the result
+		
+			$transaction = json_decode($data, TRUE);
+			if(isset($transaction['access_token']))
+			{
+				$res = array("status" => "Success", "msg" => $transaction['token_type'].' '.$transaction['access_token'], "expiry" => $transaction['expires_in']);
+			}
+			else
+			{
+				$res = array("status" => "Error", "msg" => $data);
+			}
+	        curl_close($ch);
+        	var_dump($res); exit();
+      	}
 	}
 
 }

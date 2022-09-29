@@ -94,7 +94,7 @@ class ModelSubscription extends CI_Model
 			$where[] = $programId;	
 		}
 		// $sql = "select a.*, b.priceData from (select s.*, ss.status statusName, c.cData, p.name productName, pp.sku, pp.partnerSKU from programprice pp, product p, subscription s, subscriptionstatus ss, customerv2 c  where s.isDeleted = 0 and s.status = ss.statusId and s.product = pp.sku and s.customerId = c.id and pp.productId = p.id and s.appId is not NULL and s.appId != '' $wStr) as a left join (select subscriptionId, group_concat(itemType,'=>', itemValue) priceData from subscriptionpriceitem where subscriptionId in (select id from subscription s where s.appId is not null) group by subscriptionId) b on a.id = b.subscriptionId";
-		$sql = "select a.*, b.priceData from (select s2.*, p.name productName from (select s1.*, pp.sku, pp.partnerSKU, pp.productId from (select s.*, ss.status statusName, c.cData from subscription s, subscriptionstatus ss, customerv2 c where s.isDeleted = 0 and s.customerId=c.id and s.status=ss.statusId $wStr) s1 left join programprice pp ON s1.product = pp.sku) as s2 left join product p ON s2.productId = p.id) as a left join (select subscriptionId, group_concat(itemType,'=>', itemValue) priceData from subscriptionpriceitem where subscriptionId in (select id from subscription s where s.appId is not null) group by subscriptionId) b on a.id = b.subscriptionId";
+		$sql = "select a.*, b.priceData from (select s2.*, p.name productName from (select s1.*, pp.sku, pp.partnerSKU, pp.productId from (select s.*, ss.status statusName, c.cData from subscription s, subscriptionstatus ss, customerv2 c where s.isDeleted = 0 and c.isDeleted = 0 and s.customerId=c.id and s.status=ss.statusId $wStr) s1 left join programprice pp ON s1.product = pp.sku) as s2 left join product p ON s2.productId = p.id) as a left join (select subscriptionId, group_concat(itemType,'=>', itemValue) priceData from subscriptionpriceitem where subscriptionId in (select id from subscription s where s.appId is not null) group by subscriptionId) b on a.id = b.subscriptionId";
 		$products = $this->db->query($sql, $where);
 		$count = $products->num_rows(); //counting result from query
 		if ($count === 0){
@@ -143,7 +143,7 @@ class ModelSubscription extends CI_Model
                 }	
 	}	
 
-	public function getSubscriptionByAppId($id)
+	/*public function getSubscriptionByAppId($id)
 	{
 		$wStr = ' and s.appId = ?';
 		$where = array($id);	
@@ -158,7 +158,24 @@ class ModelSubscription extends CI_Model
                 {
                         return $products->result_array();
                 }	
-	}	
+	}*/
+	
+	public function getSubscriptionByAppId($id)
+	{
+		$wStr = 'where s.appId = ?';
+		$where = array($id);	
+		$sql = "select s.* from subscription s $wStr ";
+                $products = $this->db->query($sql, $where);
+                $count = $products->num_rows(); //counting result from query
+                if ($count === 0)
+                {
+                        return false;
+                }
+                else
+                {
+                        return $products->result_array();
+                }	
+	}
 
 	public function getSubscriptionByCustomerId($id)
 	{

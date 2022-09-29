@@ -29,7 +29,25 @@ class ModelUtility extends CI_Model{
                 {
                         return false;
                 }
-        }	
+        }
+        
+        public function saveapiLog($userName, $input, $output, $function, $customerId)
+        {
+                $input = json_encode($input, JSON_UNESCAPED_UNICODE);
+                $output = json_encode($output, JSON_UNESCAPED_UNICODE);
+
+                $data = array("apiName" => $userName, "function" => $function, "customerId" => $customerId, "input" => $input, "output" => $output, "dateSubmitted" => date('Y-m-d H:i:s'));
+                $this->db->insert("apiauditlog", $data);
+                $lastId = $this->db->insert_id();
+                if($lastId >0)
+                {
+                        return $lastId;
+                }
+                else
+                {
+                        return false;
+                }
+        }
 }
 
 ?>

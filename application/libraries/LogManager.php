@@ -1,5 +1,5 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-date_default_timezone_set('Asia/Ho_Chi_Minh');
+//date_default_timezone_set('Asia/Ho_Chi_Minh');
 class LogManager {
 
 	public function logDEBUG($apiName, $input, $output)
@@ -77,7 +77,7 @@ class LogManager {
 		$fp = fopen($file_path, 'at');
 
 		$fp = fopen($file_path, 'at');
-		fwrite($fp, $today_datetime." : ".$apiName.'|'.json_encode($input).'|'.json_encode($output));
+		fwrite($fp, $today_datetime." : ".$apiName.'|'.json_encode($input).'|'.json_encode($output)."\n");
 		fclose($fp);
 
 		fwrite($fp, "\n\n");

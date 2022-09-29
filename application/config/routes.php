@@ -56,5 +56,24 @@ $route['fpt/submitCustomerApplication'] = 'CustomerV2/submitCustomerApplication'
 $route['fpt/setStatus'] = 'CustomerV2/setStatus';
 $route['all/employeeLogin'] = 'Employee/employeeLoginAll';
 $route['apis/employeeLogin'] = 'Employee/employeelogin';
+
+//Nurish : Upgrade program-----------------------------------------
+$route['up/customerinfo'] = 'CustomerUpgrade/getUpCustomerInfo';
+$route['up/createNewSession'] = 'CustomerUpgrade/addCustomerUpgrade';
+$route['up/transactionInfo'] = 'CustomerUpgrade/getTransactionInfo';
+$route['up/transactionStatus'] = 'CustomerUpgrade/getTransactionStatus';
+$route['up/cancelsession'] = 'CustomerUpgrade/canceldiagnosticSession';
+$route['up/diagnosticResult'] = 'CustomerUpgrade/getCustomerDiagnosticRslt';
+$route['up/deviceConditionType'] = 'CustomerUpgrade/getdeviceConditionType';
+$route['up/recalculateDeviceCondition'] = 'CustomerUpgrade/recalculateDeviceCondition';
+$route['up/appDiagnosticResult'] = 'CustomerUpgrade/getAppDiagnosticResult';
+$route['up/canceldeviceUpgrade'] = 'CustomerUpgrade/canceldeviceUpgrade';
+$route['up/customerConfirmUpgrade'] = 'CustomerUpgrade/customerConfirmUpgrade';
+$route['up/sessionretry'] = 'CustomerUpgrade/retry';
+$route['up/customerchecking'] = 'CustomerUpgrade/customerchecking';
+$route['diagnostic'] = 'CustomerUpgrade/getdiagnostic';
+$route['diagnostic-initialize'] = 'CustomerUpgrade/getdiagnosticInitialize';
+//-----------------------------------------------------------------
+
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

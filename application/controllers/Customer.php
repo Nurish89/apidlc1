@@ -88,7 +88,8 @@ class Customer extends CI_Controller {
 					echo json_encode($output, JSON_UNESCAPED_UNICODE);
 				}
 
-				if($this->input->post('nationality') != 'Việt Nam'){
+				if($this->input->post('nationality') != 'Việt Nam')
+				{
 					$output = array("status" => "Error",  'timeStamp' => date('Y-m-d H:i:s'), "msg" => "Non-eligible nationality");
 					//$this -> ModelUtility -> saveLog($apiName, $input, $output);
 					$this->LogManager->logApi($apiName, $input, $output);

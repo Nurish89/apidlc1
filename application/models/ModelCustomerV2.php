@@ -192,7 +192,9 @@ class ModelCustomerV2 extends CI_Model
 
 	public function addCustomer($customerData)
 	{
-		$data = array("storeId" => $customerData['storeId'], "programId" => $customerData['programId'], "cData" => $customerData['customerData']);
+		$cData = json_decode($customerData['customerData'],true);
+                $customerName = $cData['fName'].' '.$cData['mName'].' '.$cData['lName'];
+                $data = array("storeId" => $customerData['storeId'], "programId" => $customerData['programId'], "customerName" => $customerName, "nationalid" => $cData['nationalId'], "cData" => $customerData['customerData']);
 		try {
 			$this->db->insert('customerv2', $data);
                         $customerId = $this->db->insert_id();
@@ -256,6 +258,13 @@ class ModelCustomerV2 extends CI_Model
                 {
                         return $products->result_array();
                 }
+        }
+
+        public function updateCustomerInfo($customerData, $customerId)
+        {
+                $this->db->where('id',$customerId);
+                $this->db->update('customerv2',$customerData);
+                return $this->db->affected_rows();
         }
 	
 }

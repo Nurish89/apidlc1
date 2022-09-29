@@ -51,6 +51,24 @@ class ModelStore extends CI_Model
 				return $stores->result_array();
 		}	
 	}
+
+	//Nurish : Multicountry----------------------------------------
+
+	public function getStaffProgramDetails($programId)
+	{
+		$where = array($programId);
+		$sql = "select * from program where isDeleted = 0 and id in ($programId)";
+		$stores = $this->db->query($sql, $where);
+		$count = $stores->num_rows(); //counting result from query
+		if ($count === 0){
+				return false;
+		}
+		else{
+				return $stores->result_array();
+		}	
+	}
+
+	//--------------------------------------------------------------
 }
 
 ?>

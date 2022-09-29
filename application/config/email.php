@@ -2,11 +2,11 @@
 
 $config = array(
     'protocol' => 'smtp', // 'mail', 'sendmail', or 'smtp'
-    'smtp_host' => 'smtp.gmail.com',
-    'smtp_port' => 465,
-    'smtp_user' => 'support@getinstacash.in',
-    'smtp_pass' => 'qrTH9R6J@6J3',
-    'smtp_crypto' => 'ssl', //can be 'ssl' or 'tls' for example
+    'smtp_host' => 'smtp.office365.com', 
+    'smtp_port' => 587,
+    'smtp_user' => 'renewplus.support@compasia.com',
+    'smtp_pass' => 'Bal62604',
+    'smtp_crypto' => 'tls', //can be 'ssl' or 'tls' for example
     'mailtype' => 'html', //plaintext 'text' mails or 'html'
     'smtp_timeout' => '4', //in seconds
     'charset' => 'iso-8859-1',

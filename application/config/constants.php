@@ -92,9 +92,16 @@ defined('OCBPASSWORD')	       OR define('OCBPASSWORD','Abc@1234!');
 */
 
 //Live
-defined('BASE_URL')             OR define('BASE_URL', 'https://api.renew-plus.com/'); 
-defined('CRM_URL')              OR define('CRM_URL', 'https://crm.renew-plus.com/'); 
+defined('BASE_URL')             OR define('BASE_URL', 'http://localhost:8080/apidlc1/'); 
+defined('CRM_URL')              OR define('CRM_URL', 'http://localhost:8080/renewplus-mc/'); 
 defined('OCBLINK')	            OR define('OCBLINK', 'https://etecom.com-b.vn:8889/');
 defined('OCBUSERNAME')          OR define('OCBUSERNAME','compasia');
 defined('OCBPASSWORD')          OR define('OCBPASSWORD','dL.xL4*VNYsK4u\'x');
+defined('MAFCLINK')             OR define('MAFCLINK','https://lpmsapi-uat.mafc.vn');
+defined('MAFCMASTERDATALINK')   OR define('MAFCMASTERDATALINK','https://apigw-staging.mafc.vn/masterdatamci');
+
+
+//Nurish - Upgrade Program
+//defined('BBTI_URL')             OR define('BBTI_URL', 'http://localhost:8080/bbti-api/'); 
+defined('BBTI_URL')             OR define('BBTI_URL', 'http://bbtiapidev.ddns.net:3000/'); 
 

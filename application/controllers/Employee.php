@@ -76,79 +76,46 @@ class Employee extends CI_Controller {
 		$apiName = 'employeeLogin'; 
 		$this->form_validation->set_rules("userName", "User Name", "required");
 		$this->form_validation->set_rules("apiKey", "apiKey", "required");
-		$this->form_validation->set_rules("userId", "userId", "required");
-		$this->form_validation->set_rules("staffName", "Staff Name", "required");
-		$this->form_validation->set_rules("storeId", "Store Code", "required");
+		$this->form_validation->set_rules("staffEmail", "Email", "required");
+		$this->form_validation->set_rules("staffPassword", "Password", "required");
+		
 		if ($this->form_validation->run()) 
 		{
 			$userName = $this->input->post('userName');
 			$apiKey = $this->input->post('apiKey');
-			$userId = $this->input->post('userId');
-			$staffName = $this->input->post('staffName');
-			$storeCode = trim(explode('-',$this->input->post('storeId'))[0]);
+			$staffEmail = $this->input->post('staffEmail');
+			$staffPassword = $this->input->post('staffPassword');
 		
-			//$this -> load -> library('../controllers/Utility');
-			$isAuthenticate = $this -> ModelUtility -> checkApiAuthentication($userName, $apiKey);
+			$isAuthenticate = $this->ModelUtility->checkApiAuthentication($userName, $apiKey);
 			if($isAuthenticate)
-			{
-				$storeId = 0;
-				$getStore = $this->ModelStore->getStoreByCode($storeCode);
-				if($getStore)
+			{			
+				$eData = array("email" => $staffEmail);
+				$res =  $this->ModelEmployee->getEmployeeByData($eData);
+				//print_r($res); exit();
+				if($res)
 				{
-					//$eData = array("fullName" => $staffName, "idCard" => $userId);
-					$eData = array("fullName" => $staffName, "caid" => $userId);
-					$res =  $this->ModelEmployee->getEmployeeByData($eData);
-					if($res)
+					if (password_verify($staffPassword, $res[0]['password']))
 					{
-						$fincoId = 1;
-						$storeId = $getStore[0]['id'];
-						$programData = $this->ModelProgram->getProgramByStoreFinco($storeId, $fincoId);
-						//$this->ModelEmployee->setEmployeeOTP($res[0]['id'], $newOTP, $getStore[0]['id'], $fincoId, $programData[0]['id']);
-						$output = array("status" => "Success", "msg" => "Login successfully1", "employeeId" => $res[0]['id'], "storeId" => $storeId, "programId" => $programData[0]['id']);
-						//$this->ModelUtility->saveLog($apiName, $input, $output);
+						$output = array("status" => "Success", "msg" => "Login successfully", "employeeId" => $res[0]['id'], "programId" => $res[0]['programId'], "storeId" => $res[0]['channelStoreId']);
 						$this->LogManager->logApi($apiName, $input, $output);
 						echo json_encode($output);
 					}
-					else
-					{
-						$empData = getEmployees();
-						if($empData['status'] =='Success'){
-							for($i=0;$i<sizeof($empData['msg']);$i++)
-								$this->ModelEmployee->addEmployee(array("userId"=>$empData['msg'][$i]['userId'], "fullName"=>$empData['msg'][$i]['fullName'], "idCard"=>$empData['msg'][$i]['idCard']));
-							$res =  $this->ModelEmployee->getEmployeeByData($eData);
-							if($res)
-							{
-								$fincoId = 1;
-								$storeId = $getStore[0]['id'];
-								$programData = $this->ModelProgram->getProgramByStoreFinco($storeId, $fincoId);
-								//$this->ModelEmployee->setEmployeeOTP($res[0]['id'], $newOTP, $getStore[0]['id'], $fincoId, $programData[0]['id']);
-								$output = array("status" => "Success", "msg" => "Login successfully2", "employeeId" => $res[0]['id'], "storeId" => $storeId, "programId" => $programData[0]['id']);
-								$this->LogManager->logApi($apiName, $input, $output);
-								//$this->ModelUtility->saveLog($apiName, $input, $output);
-								echo json_encode($output);
-							}
-							else
-							{
-								$output = array("status" => "Error", "msg" => "Invalid credentials", 'timeStamp' => date('Y-m-d H:i:s'));
-								//$this -> ModelUtility -> saveLog($apiName, $input, $output);
-								$this->LogManager->logApi($apiName, $input, $output);
-								echo json_encode($output);
-							}
-						}
+					else{
+						$output = array("status" => "Error", "msg" => "Invalid Password", 'timeStamp' => date('Y-m-d H:i:s'));			
+						$this->LogManager->logApi($apiName, $input, $output);
+						echo json_encode($output);
 					}
 				}
 				else
 				{
 					$output = array("status" => "Error", "msg" => "Invalid credentials", 'timeStamp' => date('Y-m-d H:i:s'));
-					//$this -> ModelUtility -> saveLog($apiName, $input, $output);
 					$this->LogManager->logApi($apiName, $input, $output);
 					echo json_encode($output);
-				}
+				}	
 			}
 			else
 			{
 				$output = array("status" => "Error", "msg" => "Invalid User Name or Api Key", 'timeStamp' => date('Y-m-d H:i:s'));
-				//$this -> ModelUtility -> saveLog($apiName, $input, $output);
 				$this->LogManager->logApi($apiName, $input, $output);
 				echo json_encode($output);
 			}	
@@ -159,13 +126,10 @@ class Employee extends CI_Controller {
 			if($arr)
 			{	
 				$output = array("status" => "Error", "msg" => $arr['Errors'], 'timeStamp' => date('Y-m-d H:i:s'));
-				//$this -> ModelUtility -> saveLog($apiName, $input, $output);
 				$this->LogManager->logApi($apiName, $input, $output);
 				echo json_encode($output);
-				//print_r($arr);
 			}
 		}	
-	//echo true;
 	}
 
 	
@@ -225,4 +189,144 @@ class Employee extends CI_Controller {
 		}	
 	//echo true;
 	}
+
+	//Nurish : Multi Country ---------------------------------------------------------------------
+	public function employeeSetPassword()
+	{
+		$input = $this->input->post();
+		$apiName = 'Employee Set Password'; 
+		$this->form_validation->set_rules("userName", "User Name", "required");
+		$this->form_validation->set_rules("apiKey", "apiKey", "required");
+		$this->form_validation->set_rules("password", "Password", "required");
+		$this->form_validation->set_rules("cpassword", "Confirm Password", "required");
+		$this->form_validation->set_rules("token", "Unique token", "required");
+
+		if ($this->form_validation->run()) 
+		{
+			$userName = $this->input->post('userName');
+			$apiKey = $this->input->post('apiKey');
+			$password = $this->input->post('password');
+			$cpassword = $this->input->post('cpassword');
+
+			if($password != $cpassword){
+				$output = array("status" => "Error", "msg" => "The password confirmation deos not match", 'timeStamp' => date('Y-m-d H:i:s'));
+				echo json_encode($output);
+			}
+			else{
+				$isAuthenticate = $this -> ModelUtility -> checkApiAuthentication($userName, $apiKey);
+				if($isAuthenticate)
+				{
+					$token = $this->input->post('token');
+					$getForgotData = $this->ModelEmployee->getStaffByToken($token);
+					if($getForgotData)
+					{
+						$eDate = $getForgotData[0]['expiryDate'];
+						if($eDate > date('Y-m-d H:i:s'))
+						{
+							$staffId = $getForgotData[0]['staffId'];
+							$password = $this->input->post('password');
+							$passwordData = $this->encrypt($password);
+							$isUpdated= $this->ModelEmployee->setUserPassword($staffId, $passwordData['encrypted'], $passwordData['salt']);
+							if($isUpdated)
+							{
+								$this->ModelEmployee->updateForgotToken($token);
+								$output = array("status" => "Success", "msg" => "Password updated successfully.", 'timeStamp' => date('Y-m-d H:i:s'));
+								$this->LogManager->logApi($apiName, $input, $output);
+								echo json_encode($output);
+							}
+							else
+							{
+								$output = array("status" => "Error", "msg" => "Somthing went wrong when updating data", 'timeStamp' => date('Y-m-d H:i:s'));
+								$this->LogManager->logApi($apiName, $input, $output);
+								echo json_encode($output);
+							}	
+						}
+						else{
+							$output = array("status" => "Error", "msg" => "Token expired", 'timeStamp' => date('Y-m-d H:i:s'));
+							$this->LogManager->logApi($apiName, $input, $output);
+							echo json_encode($output);
+						}	
+					}
+					else{
+						$output = array("status" => "Error", "msg" => "Invalid token", 'timeStamp' => date('Y-m-d H:i:s'));
+						$this->LogManager->logApi($apiName, $input, $output);
+						echo json_encode($output);
+					}
+				}
+				else{
+					$output = array("status" => "Error", "msg" => "Invalid User Name or Api Key", 'timeStamp' => date('Y-m-d H:i:s'));
+					$this->LogManager->logApi($apiName, $input, $output);
+					echo json_encode($output);
+				}
+			}
+		}
+		else{
+			$arr = array("Errors"=>validation_errors());
+			if($arr)
+			{	
+				$output = array("status" => "Error", "msg" => $arr['Errors'], 'timeStamp' => date('Y-m-d H:i:s'));
+				$this->LogManager->logApi($apiName, $input, $output);
+				echo json_encode($output);
+			}
+		}
+	}
+
+	public function encrypt($password)
+	{
+		$encrypted = password_hash($password, PASSWORD_DEFAULT);
+		$hash = array("salt" => '', "encrypted" => $encrypted);
+		return $hash;
+	}
+
+	public function getIsUpgradeProgram()
+	{
+		$input = $this->input->post();
+		$apiName = 'getIsUpgradeProgram'; 
+		$this->form_validation->set_rules("userName", "User Name", "required");
+		$this->form_validation->set_rules("apiKey", "apiKey", "required");
+
+		if ($this->form_validation->run()) 
+		{
+			$userName = $this->input->post('userName');
+			$apiKey = $this->input->post('apiKey');
+			$programId = $this->input->post('programId');
+
+			$isAuthenticate = $this->ModelUtility->checkApiAuthentication($userName, $apiKey);
+			if($isAuthenticate)
+			{
+				$getProgram = $this->ModelProgram->getProgram($programId);
+				//print_r($getProgram); die();
+				if($getProgram)
+				{					
+					$isUpgradeProgram = $getProgram[0]['isUpgradeProgram'];
+					$output = array("status" => "Success", "flag" => $isUpgradeProgram, 'timeStamp' => date('Y-m-d H:i:s'));
+					$this->LogManager->logApi($apiName, $input, $output);
+					echo json_encode($output);					
+				}
+				else{
+					$output = array("status" => "Error", "msg" => "Token expired", 'timeStamp' => date('Y-m-d H:i:s'));
+					$this->LogManager->logApi($apiName, $input, $output);
+					echo json_encode($output);
+				}	
+			}
+			else{
+				$output = array("status" => "Error", "msg" => "Invalid User Name or Api Key", 'timeStamp' => date('Y-m-d H:i:s'));
+				$this->LogManager->logApi($apiName, $input, $output);
+				echo json_encode($output);
+			}
+			
+		}
+		else
+		{
+			$arr = array("Errors"=>validation_errors());
+			if($arr)
+			{	
+				$output = array("status" => "Error", "msg" => $arr['Errors'], 'timeStamp' => date('Y-m-d H:i:s'));
+				$this->LogManager->logApi($apiName, $input, $output);
+				echo json_encode($output);
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
 }

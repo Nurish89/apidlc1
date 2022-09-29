@@ -1383,8 +1383,8 @@ class Subscription extends CI_Controller {
 						$nd['customerId'] = $data[$i]['customerId'];
 						$nd['customerName'] = isset($cData['fullname']) ? $cData['fullname'] : (isset($cData['fName']) ? $cData['fName'] : '');
 						$nd['productName'] = $data[$i]['productName'] != '' ? $data[$i]['productName'] : (isset($appInfo['Device Model']) ? $appInfo['Device Model'] : '');
-						$nd['orderValue'] = $data[$i]['orderValue'] != '' ? $data[$i]['orderValue'] : (isset($appInfo['Device Total Price']) ? $appInfo['Device Total Price'] : '');
-						$nd['tenure'] = isset($cData['tenure']) ? $cData['tenure'] : (isset($data[$i]['tenure']) ? $data[$i]['tenure'] : (isset($appInfo['Loan Tenure']) ? $appInfo['Loan Tenure'] : ''));
+						$nd['orderValue'] = $data[$i]['orderValue'] != '' ? $data[$i]['orderValue'] : (isset($appInfo['loanAmount']) ? ($appInfo['loanAmount']+$appInfo['downPayment']) : (isset($appInfo['Device Total Price']) ? $appInfo['Device Total Price'] : ''));
+						$nd['tenure'] = isset($cData['tenure']) ? $cData['tenure'] : (isset($data[$i]['tenure']) ? $data[$i]['tenure'] : (isset($appInfo['Loan Tenure']) ? $appInfo['Loan Tenure'] : (isset($appInfo['loanTerm']) ? $appInfo['loanTerm'] : '')));
 						$nd['statusName'] = $data[$i]['statusName'];
 						$nd['capf'] = 0;
 						$newData[] = $nd;
